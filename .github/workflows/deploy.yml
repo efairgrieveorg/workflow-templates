@@ -14,7 +14,6 @@ jobs:
     name: DEV Deploys to AWS S3
     if: contains(fromJson('["DEV", "SIT", "PRE_PROD", "PROD"]'), inputs.passed_env_filter)
     runs-on: ubuntu-latest
-    needs: [pre-run-info]
     environment:
       name: DEV
     env:
