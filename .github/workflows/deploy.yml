@@ -1,0 +1,81 @@
+name: "Test"
+
+on:
+  workflow_call:
+    inputs:
+      passed_env_filter:
+        required: true
+        type: string
+        description: Passed from parent workflow
+        default: DEV
+
+jobs:
+  pre-run-info:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    name: Pre-run info
+    steps:
+      - name: Branch and Event for now
+        run: |
+          echo "Running on branch: ${{ github.ref }}"
+          echo "Running up to environment: ${{ inputs.passed_env_filter }}"
+
+  # dev-tf-deploy:
+  #   if: contains(fromJson('["DEV", "SIT", "PRE_PROD", "PROD"]'), inputs.passed_env_filter)
+  #   needs: [pre-run-info]
+  #   runs-on: ubuntu-latest
+  #   name: DEV Deploys to AWS S3
+  #   environment: DEV
+  #   env:
+  #     TF_VAR_env: dev
+  #     TF_VAR_project: ${{ github.event.repository.name }}
+  #   steps:
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v2
+  #     - name: Pickup AWS Creds and Terraform Role
+  #       uses: aws-actions/configure-aws-credentials@v1
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: eu-west-1
+  #         role-to-assume: ${{ secrets.AWS_DEPLOYMENT_ROLE }}
+  #         role-session-name: GitHubActions-${{ github.event.repository.name }}
+  #         role-duration-seconds: 3600
+  #     - name: terraform init
+  #       run: |
+  #         terraform init -backend-config="bucket=efairgrieve-terraform-states" -backend-config="key=${{ env.TF_VAR_env }}-${{ github.event.repository.name }}-state" 
+  #     - name: terraform plan
+  #       run: |
+  #         terraform plan -out=plan.output
+  #     - name: terraform apply
+  #       run: terraform apply -auto-approve -input=false plan.output
+
+  # sit-tf-deploy:
+  #   if: contains(fromJson('["SIT", "PRE_PROD", "PROD"]'), github.event.inputs.env_filter)
+  #   needs: [dev-tf-deploy]
+  #   runs-on: ubuntu-latest
+  #   name: SIT Deploys to AWS S3
+  #   environment: SIT
+  #   env:
+  #     TF_VAR_env: sit
+  #     TF_VAR_project: ${{ github.event.repository.name }}
+  #   steps:
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v2
+  #     - name: Pickup AWS Creds and Terraform Role
+  #       uses: aws-actions/configure-aws-credentials@v1
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: eu-west-1
+  #         role-to-assume: ${{ secrets.AWS_DEPLOYMENT_ROLE }}
+  #         role-session-name: GitHubActions-${{ env.TF_VAR_env }}-${{ github.event.repository.name }}
+  #         role-duration-seconds: 3600
+  #     - name: terraform init
+  #       run: |
+  #         terraform init -backend-config="bucket=efairgrieve-terraform-states" -backend-config="key=${{ env.TF_VAR_env }}-${{ github.event.repository.name }}-state" 
+  #     - name: terraform plan
+  #       run: |
+  #         terraform plan -out=plan.output
+  #     - name: terraform apply
+  #       run: terraform apply -auto-approve -input=false plan.output
