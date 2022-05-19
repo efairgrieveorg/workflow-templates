@@ -19,6 +19,7 @@ jobs:
         run: |
           echo "Running on branch: ${{ github.ref }}"
           echo "Running up to environment: ${{ inputs.passed_env_filter }}"
+          echo "This is definitely new"
 
   # dev-tf-deploy:
   #   if: contains(fromJson('["DEV", "SIT", "PRE_PROD", "PROD"]'), inputs.passed_env_filter)
