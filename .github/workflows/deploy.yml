@@ -41,7 +41,12 @@ jobs:
           role-to-assume: ${{ secrets.AWS_DEPLOYMENT_ROLE }}
           role-session-name: GitHubActions-${{ github.event.repository.name }}
           role-duration-seconds: 3600
-
+      - name: terraform init
+        run: |
+          terraform init -backend-config="bucket=efairgrieve-terraform-states" -backend-config="key=${{ env.TF_VAR_env }}-${{ github.event.repository.name }}-state" 
+      - name: terraform plan
+        run: |
+          terraform plan -out=plan.output
 
 
 
