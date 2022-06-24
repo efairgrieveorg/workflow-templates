@@ -1,0 +1,39 @@
+name: "Euan Plan"
+
+on:
+  workflow_call:
+    inputs:
+      confirm-destroy:
+        type: string
+        required: true
+        description: "true = workflow will actually destroy, false = just a plan of the destroy"
+
+jobs:
+  deploy:
+    name: Destroy
+    runs-on: ubuntu-latest
+    environment:
+      name: DEV
+    env:
+      TF_VAR_project: ${{ github.event.repository.name }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Pickup AWS Creds and Terraform Role
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+          role-to-assume: ${{ secrets.AWS_DEPLOYMENT_ROLE }}
+          role-session-name: GitHubActions-${{ github.event.repository.name }}
+          role-duration-seconds: 3600
+      - name: terraform init
+        run: |
+          terraform init -backend-config="bucket=efairgrieve-terraform-states" -backend-config="key=${{ github.event.repository.name }}-state" 
+      - name: terraform plan
+        run: |
+          terraform plan -out=plan.output -destroy
+      - name: terraform destroy
+        if: ${{ inputs.confirm-destroy == 'true' }}
+        run: terraform apply -auto-approve -input=false plan.output
