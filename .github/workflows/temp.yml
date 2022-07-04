@@ -13,8 +13,11 @@ jobs:
       - name: Checkout remote repo
         uses: actions/checkout@v2
         with:
-          name: efairgrieveorg/workflow-templates
+          repository: efairgrieveorg/workflow-templates
           path: ./remote
+      - name: See whats here
+        run: |
+          ls -al
       - name: Install CI Dependencies
         run: |
           pip install -r ./remote/tests/ci/requirements-ci.txt
