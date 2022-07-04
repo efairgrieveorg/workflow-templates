@@ -1,0 +1,25 @@
+name: "Euan Temp"
+
+on:
+  workflow_call:
+
+jobs:
+  shift-left:
+    runs-on: ubuntu-latest
+    name: Shift-Left
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Install CI Dependencies
+        run: |
+          pip install -r ./src/tests/ci/requirements-ci.txt
+      - name: Execute CI Tests
+        continue-on-error: true
+        run: |
+          pytest ./src/tests/ci -vv --html=ci-test-report.html --self-contained-html
+      - name: Archive the CI Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: ci-test-report
+          path: |
+            ci-test-report.html
