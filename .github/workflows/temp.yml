@@ -13,18 +13,18 @@ jobs:
       - name: Checkout remote repo
         uses: actions/checkout@v2
         with:
-          repository: efairgrieveorg/workflow-templates
-          path: ./remote
+          repository: efairgrieveorg/ci-tests
+          path: ./ci-tests
       - name: See whats here
         run: |
           ls -al
       - name: Install CI Dependencies
         run: |
-          pip install -r ./remote/tests/ci/requirements-ci.txt
+          pip install -r ./ci-tests/tests/ci/requirements-ci.txt
       - name: Execute CI Tests
         continue-on-error: true
         run: |
-          pytest ./remote/tests/ci -vv --html=ci-test-report.html --self-contained-html
+          pytest ./ci-tests/tests/ci -vv --html=ci-test-report.html --self-contained-html
       - name: Archive the CI Report
         uses: actions/upload-artifact@v3
         with:
